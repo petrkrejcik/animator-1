@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Image Creator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <header>
+            <h1>Animated Image Creator</h1>
+        </header>
+        
+        <main id="mainContent">
+            <div class="image-upload-container" id="imageContainer">
+                <div class="upload-section">
+                    <label for="image1" class="upload-label">
+                        <div class="upload-placeholder" id="preview1">
+                            <span>Upload First Image</span>
+                        </div>
+                    </label>
+                    <input type="file" id="image1" accept="image/*" class="file-input">
+                    <button class="remove-button" data-index="1" style="display: none;">×</button>
+                </div>
+
+                <div class="upload-section">
+                    <label for="image2" class="upload-label">
+                        <div class="upload-placeholder" id="preview2">
+                            <span>Upload Second Image</span>
+                        </div>
+                    </label>
+                    <input type="file" id="image2" accept="image/*" class="file-input">
+                    <button class="remove-button" data-index="2" style="display: none;">×</button>
+                </div>
+            </div>
+
+            <div class="add-image-container">
+                <button id="addImageBtn" class="secondary-button">+ Add Another Image</button>
+            </div>
+
+            <div id="maskingContainer" class="masking-container" style="display: none;">
+                <h3>Select Animation Area</h3>
+                <p class="masking-instructions">Draw on the image to select areas that will be animated. The rest will remain static.</p>
+                <div class="masking-controls">
+                    <div class="brush-controls">
+                        <label>
+                            Brush Size:
+                            <input type="range" id="brushSize" min="5" max="50" value="20">
+                        </label>
+                    </div>
+                    <button id="clearMask" class="secondary-button">Clear Selection</button>
+                    <button id="confirmMask" class="primary-button">Confirm Selection</button>
+                </div>
+                <div id="maskingCanvas" class="masking-canvas-container"></div>
+            </div>
+
+            <div class="controls">
+                <div class="settings">
+                    <label>
+                        Animation Duration (ms):
+                        <input type="number" id="duration" value="1000" min="100" max="5000" step="100">
+                    </label>
+                </div>
+                <button id="createAnimation" class="primary-button" disabled>Create Animation</button>
+            </div>
+
+            <div class="preview-container">
+                <h2>Preview</h2>
+                <div id="animationPreview"></div>
+                <button id="downloadBtn" class="secondary-button" disabled>Download Animation</button>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
