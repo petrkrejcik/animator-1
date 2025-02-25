@@ -1,4 +1,3 @@
-// DOM Elements
 const imageContainer = document.getElementById('imageContainer');
 const addImageBtn = document.getElementById('addImageBtn');
 const createAnimationBtn = document.getElementById('createAnimation');
@@ -11,7 +10,6 @@ const brushSizeInput = document.getElementById('brushSize');
 const clearMaskBtn = document.getElementById('clearMask');
 const confirmMaskBtn = document.getElementById('confirmMask');
 
-// State
 let images = new Map();
 let nextImageId = 3;
 let maskCanvas, maskCtx;
@@ -19,7 +17,6 @@ let baseCanvas, baseCtx;
 let isDrawing = false;
 let maskData = null;
 
-// Helper Functions
 function loadImage(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -49,27 +46,22 @@ function createCanvas(width, height) {
 }
 
 function initializeMaskingCanvas(baseImage) {
-    // Clear previous canvases
     maskingCanvasContainer.innerHTML = '';
     
-    // Create base canvas
     baseCanvas = createCanvas(baseImage.width, baseImage.height);
     baseCanvas.style.position = 'absolute';
     baseCtx = baseCanvas.getContext('2d');
     baseCtx.drawImage(baseImage, 0, 0);
     
-    // Create mask canvas
     maskCanvas = createCanvas(baseImage.width, baseImage.height);
     maskCanvas.style.position = 'absolute';
     maskCtx = maskCanvas.getContext('2d');
     
-    // Create container div for proper sizing
     const containerDiv = document.createElement('div');
     containerDiv.style.position = 'relative';
     containerDiv.style.width = '100%';
     containerDiv.style.paddingTop = `${(baseImage.height / baseImage.width) * 100}%`;
     
-    // Add canvases to container
     const canvasWrapper = document.createElement('div');
     canvasWrapper.style.position = 'absolute';
     canvasWrapper.style.top = '0';
@@ -82,7 +74,6 @@ function initializeMaskingCanvas(baseImage) {
     containerDiv.appendChild(canvasWrapper);
     maskingCanvasContainer.appendChild(containerDiv);
     
-    // Setup drawing events
     setupDrawingEvents();
 }
 
@@ -97,8 +88,8 @@ function setupDrawingEvents() {
         const scaleX = maskCanvas.width / rect.width;
         const scaleY = maskCanvas.height / rect.height;
         
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+        const x = (e.clientX || e.touches[0].clientX) - rect.left * scaleX;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top * scaleY;
         
         maskCtx.beginPath();
         maskCtx.moveTo(lastX, lastY);
@@ -124,6 +115,19 @@ function setupDrawingEvents() {
     maskCanvas.addEventListener('mousemove', draw);
     maskCanvas.addEventListener('mouseup', () => isDrawing = false);
     maskCanvas.addEventListener('mouseout', () => isDrawing = false);
+    
+    maskCanvas.addEventListener('touchstart', (e) => {
+        isDrawing = true;
+        const rect = maskCanvas.getBoundingClientRect();
+        const scaleX = maskCanvas.width / rect.width;
+        const scaleY = maskCanvas.height / rect.height;
+        lastX = (e.touches[0].clientX - rect.left) * scaleX;
+        lastY = (e.touches[0].clientY - rect.top) * scaleY;
+    });
+    
+    maskCanvas.addEventListener('touchmove', draw);
+    maskCanvas.addEventListener('touchend', () => isDrawing = false);
+    maskCanvas.addEventListener('touchcancel', () => isDrawing = false);
 }
 
 function createUploadSection(id) {
@@ -172,33 +176,27 @@ async function createWebPAnimation(imageList, duration) {
     const canvas = createCanvas(maxWidth, maxHeight);
     const ctx = canvas.getContext('2d');
     
-    // Create frames for each image
     const frames = [];
     const mask = maskData ? maskCtx.getImageData(0, 0, maxWidth, maxHeight).data : null;
     
-    // First frame is the static image
     ctx.drawImage(firstImage, 0, 0);
     frames.push(canvas.toDataURL('image/webp', 0.9));
     
-    // Create animated frames with mask
     for (const [id, img] of imageList) {
-        if (id === 1) continue; // Skip first image as it's the base
+        if (id === 1) continue;
         
-        ctx.drawImage(firstImage, 0, 0); // Draw base image
+        ctx.drawImage(firstImage, 0, 0);
         
         if (mask) {
-            // Create temporary canvas for the current frame
             const tempCanvas = createCanvas(maxWidth, maxHeight);
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(img, 0, 0);
             
-            // Get image data
             const baseImageData = ctx.getImageData(0, 0, maxWidth, maxHeight);
             const frameImageData = tempCtx.getImageData(0, 0, maxWidth, maxHeight);
             
-            // Apply mask
             for (let i = 0; i < mask.length; i += 4) {
-                if (mask[i] > 0) { // If mask pixel is not transparent
+                if (mask[i] > 0) {
                     baseImageData.data[i] = frameImageData.data[i];
                     baseImageData.data[i + 1] = frameImageData.data[i + 1];
                     baseImageData.data[i + 2] = frameImageData.data[i + 2];
@@ -252,7 +250,6 @@ function checkCanCreate() {
     }
 }
 
-// Event Listeners
 addImageBtn.addEventListener('click', () => {
     imageContainer.appendChild(createUploadSection(nextImageId++));
 });
@@ -270,7 +267,6 @@ confirmMaskBtn.addEventListener('click', () => {
     }
 });
 
-// Initialize the first two upload sections
 document.querySelectorAll('.file-input').forEach((input, index) => {
     const id = index + 1;
     const removeBtn = input.parentElement.querySelector('.remove-button');
